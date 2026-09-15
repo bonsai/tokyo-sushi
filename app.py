@@ -4,6 +4,14 @@ from aw.graph import run_aw
 app = Flask(__name__)
 
 
+@app.after_request
+def cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return response
+
+
 @app.get("/health")
 def health():
     return jsonify({"status": "ok", "service": "tokyo-sushi-aw"})
