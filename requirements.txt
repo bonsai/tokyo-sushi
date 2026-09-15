@@ -2,4 +2,6 @@ Flask>=3.1,<4
 langgraph>=0.6,<1
 langchain-core>=0.3,<2
 gunicorn>=23,<24
+matplotlib>=3.9,<4
+contextily>=1.6,<2
 pytest>=8,<9
