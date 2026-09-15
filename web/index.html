@@ -5,23 +5,38 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tokyo Sushi × Date Optimization</title>
 <style>
-body{font-family:system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:0 20px;background:#fafafa;color:#222}h1{margin-bottom:4px}.sub{color:#666}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}.card{background:white;border:1px solid #ddd;border-radius:14px;padding:18px}.score{font-size:2rem;font-weight:700}.bar{height:8px;background:#eee;border-radius:8px;overflow:hidden;margin:5px 0 10px}.bar i{display:block;height:100%;background:#222}.meta{color:#666}.weights{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.tag{padding:6px 10px;border:1px solid #ddd;border-radius:999px;background:white;font-size:.85rem}
+body{font-family:system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:0 20px;background:#fafafa;color:#222}h1{margin-bottom:4px}.sub{color:#666}.search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:24px 0}.search input{padding:13px;border:1px solid #ccc;border-radius:10px;font-size:1rem}.search button{padding:13px 20px;border:0;border-radius:10px;background:#222;color:white;cursor:pointer}.api{font-size:.8rem;color:#777;margin-bottom:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}.card{background:white;border:1px solid #ddd;border-radius:14px;padding:18px}.score{font-size:2rem;font-weight:700}.bar{height:8px;background:#eee;border-radius:8px;overflow:hidden;margin:5px 0 10px}.bar i{display:block;height:100%;background:#222}.meta{color:#666}.weights{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.tag{padding:6px 10px;border:1px solid #ddd;border-radius:999px;background:white;font-size:.85rem}.status{margin:12px 0;color:#666}
 </style>
 </head>
 <body>
 <h1>Tokyo Sushi × Date Optimization</h1>
-<p class="sub">予算4,000円前後で、デート体験を最大化するPOC</p>
+<p class="sub">自然言語の質問 → LangGraph AW → RAG/Filter → 重み付きランキング TOP12</p>
+<form id="search" class="search"><input id="question" value="4000円くらいで初デート向きは？"><button>検索</button></form>
+<div class="api">API: <input id="api" value="http://localhost:8000" style="width:260px;padding:5px;border:1px solid #ddd;border-radius:6px"></div>
+<div id="status" class="status"></div>
 <div id="weights" class="weights"></div>
 <div id="app" class="grid"></div>
 <script>
-const dims=['price','visual','conversation','atmosphere','surprise','access','food'];
-fetch('./data/sushi.json').then(r=>r.json()).then(data=>{
- const weighted=s=>dims.reduce((a,k)=>a+s.scores[k]*data.weights[k],0);
- data.stores.forEach(s=>s.weighted_score=weighted(s));
- data.stores.sort((a,b)=>b.weighted_score-a.weighted_score);
- document.querySelector('#weights').innerHTML=Object.entries(data.weights).map(([k,v])=>`<span class="tag">${k}: ${Math.round(v*100)}%</span>`).join('');
- document.querySelector('#app').innerHTML=data.stores.map((s,i)=>`<article class="card"><h2>#${i+1} ${s.name}</h2><p class="meta">${s.area} · ¥${s.price.toLocaleString()}</p><div class="score">${(s.weighted_score*100).toFixed(1)}<small>/100</small></div>${dims.map(k=>`<div>${k} ${Math.round(s.scores[k]*100)}</div><div class="bar"><i style="width:${s.scores[k]*100}%"></i></div>`).join('')}</article>`).join('');
-}).catch(e=>document.querySelector('#app').textContent='データ読み込みエラー: '+e.message);
+const dims=['price','visual','conversation','atmosphere','surprise','food'];
+const labels={price:'価格',visual:'見栄え',conversation:'会話',atmosphere:'雰囲気',surprise:'サプライズ',food:'料理'};
+function render(data){
+ const weights=data.query.weights;
+ document.querySelector('#weights').innerHTML=Object.entries(weights).map(([k,v])=>`<span class="tag">${labels[k]||k}: ${Math.round(v*100)}%</span>`).join('');
+ document.querySelector('#app').innerHTML=data.stores.map((s,i)=>`<article class="card"><h2>#${i+1} ${s.name}</h2><p class="meta">${s.area} · ¥${s.price.toLocaleString()}</p><div class="score">${(s.weighted_score*100).toFixed(1)}<small>/100</small></div>${dims.map(k=>`<div>${labels[k]} ${Math.round(s.scores[k]*100)}</div><div class="bar"><i style="width:${s.scores[k]*100}%"></i></div>`).join('')}</article>`).join('');
+}
+async function search(question){
+ document.querySelector('#status').textContent='AW実行中…';
+ const base=document.querySelector('#api').value.replace(/\/$/,'');
+ try{
+  const r=await fetch(base+'/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+  const data=await r.json();
+  if(!r.ok) throw new Error(data.error||r.statusText);
+  render(data);
+  document.querySelector('#status').textContent=`${data.count}件をランキング（価格: ${data.query.min_price||'—'}〜${data.query.max_price||'—'}円）`;
+ }catch(e){document.querySelector('#status').textContent='API接続エラー: '+e.message+' / Flaskを localhost:8000 で起動してください';}
+}
+document.querySelector('#search').addEventListener('submit',e=>{e.preventDefault();search(document.querySelector('#question').value)});
+search(document.querySelector('#question').value);
 </script>
 </body>
 </html>
