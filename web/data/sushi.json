@@ -1,0 +1,10 @@
+{
+  "goal": "date-optimization",
+  "budget": {"target": 4000, "min": 3000, "max": 5000, "currency": "JPY"},
+  "weights": {"price":0.15,"visual":0.15,"conversation":0.20,"atmosphere":0.20,"surprise":0.10,"access":0.10,"food":0.10},
+  "stores": [
+    {"name":"まんてん鮨 丸の内","area":"丸の内","price":4000,"scores":{"price":0.90,"visual":0.90,"conversation":0.85,"atmosphere":0.90,"surprise":0.75,"access":0.95,"food":0.90}},
+    {"name":"鮪金 銀座","area":"銀座","price":4000,"scores":{"price":0.85,"visual":0.90,"conversation":0.80,"atmosphere":0.90,"surprise":0.80,"access":0.95,"food":0.90}},
+    {"name":"すし山 新宿","area":"新宿","price":4000,"scores":{"price":0.90,"visual":0.85,"conversation":0.90,"atmosphere":0.85,"surprise":0.80,"access":0.95,"food":0.85}}
+  ]
+}
