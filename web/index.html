@@ -15,13 +15,13 @@ body{font-family:system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:
 <div id="app" class="grid"></div>
 <script>
 const dims=['price','visual','conversation','atmosphere','surprise','access','food'];
-fetch('../data/sushi.json').then(r=>r.json()).then(data=>{
+fetch('./data/sushi.json').then(r=>r.json()).then(data=>{
  const weighted=s=>dims.reduce((a,k)=>a+s.scores[k]*data.weights[k],0);
  data.stores.forEach(s=>s.weighted_score=weighted(s));
  data.stores.sort((a,b)=>b.weighted_score-a.weighted_score);
  document.querySelector('#weights').innerHTML=Object.entries(data.weights).map(([k,v])=>`<span class="tag">${k}: ${Math.round(v*100)}%</span>`).join('');
  document.querySelector('#app').innerHTML=data.stores.map((s,i)=>`<article class="card"><h2>#${i+1} ${s.name}</h2><p class="meta">${s.area} · ¥${s.price.toLocaleString()}</p><div class="score">${(s.weighted_score*100).toFixed(1)}<small>/100</small></div>${dims.map(k=>`<div>${k} ${Math.round(s.scores[k]*100)}</div><div class="bar"><i style="width:${s.scores[k]*100}%"></i></div>`).join('')}</article>`).join('');
-});
+}).catch(e=>document.querySelector('#app').textContent='データ読み込みエラー: '+e.message);
 </script>
 </body>
 </html>
