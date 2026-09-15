@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tokyo Sushi HTMX Test</title>
+  <script src="https://unpkg.com/htmx.org@2.0.6"></script>
+  <style>body{font-family:system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem}form{display:flex;gap:.5rem}input{flex:1;padding:.7rem}button{padding:.7rem 1rem}article{border:1px solid #ddd;border-radius:12px;padding:1rem;margin-top:1rem}.dims{display:flex;flex-wrap:wrap;gap:.5rem}.dim{background:#f3f3f3;padding:.3rem .5rem;border-radius:6px}</style>
+</head>
+<body>
+  <h1>Tokyo Sushi / HTMX test</h1>
+  <form hx-post="./data/dummy-response.html" hx-target="#results" hx-swap="innerHTML">
+    <input name="question" value="4000円くらいで初デート向きの寿司屋">
+    <button type="submit">検索</button>
+  </form>
+  <section id="results"><p>検索するとダミーHTMLをHTMXで差し替えます。</p></section>
+</body>
+</html>
